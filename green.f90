@@ -18,9 +18,9 @@ program green
 
 	! Definição das variáveis
 	real*16,parameter :: mu = 0
-	real*16, parameter :: eta = 10.0D-3
+	real*16, parameter :: eta = 10.0D-5
 	real*16, parameter :: t = 0.5
-	real*16, parameter :: delta = t/2
+	real*16, parameter :: delta = 0.2*t
 	real*16, parameter :: min = -2.0D+00
 	real*16, parameter :: max = 2.0D+00
 	real*16, parameter :: PI = 3.141592D+00
@@ -30,8 +30,8 @@ program green
 	complex*16,dimension(2,2) :: ID, V, W, WT, g, gt, gb, inv
 	complex*16,dimension(2) :: work
 	
-	integer,parameter :: N = 1000 ! Number of sites
-	integer,parameter :: qtd = 10000 ! Discretization
+	integer,parameter :: N = 30000 ! Number of sites
+	integer,parameter :: qtd = 1000 ! Discretization
 	integer,dimension(2) :: ipiv
 	integer :: i,j,info
 
@@ -99,8 +99,8 @@ program green
 			gt = matmul(inv,gb)
 		enddo
 
-		!write(1,*) omega,(-1.0D+00/PI)*aimag(0.25*(gt(1,1)+gt(2,2)+imag*gt(1,2)-imag*gt(2,1)))
-		write(1,*) omega,(-1.0D+00/PI)*(eta*PI)*aimag(gt(2,2))
+		write(1,*) omega,(-1.0D+00/PI)*aimag(0.25*(gt(1,1)+gt(2,2)+imag*gt(1,2)-imag*gt(2,1)))
+		!write(1,*) omega,(-1.0D+00/PI)*(eta*PI)*aimag(gt(2,2))
 
 		omega = omega + step
 	enddo	
