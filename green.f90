@@ -99,8 +99,8 @@ program green
 			gt = matmul(inv,gb)
 		enddo
 
-		!write(1,*) omega,(-1.0D+00/PI)*aimag(0.25*(gt(1,1)+gt(2,2)+imag*gt(1,2)-imag*gt(2,1)))
-		write(1,*) omega,(-1.0D+00/PI)*(eta*PI)*aimag(gt(2,2))
+		write(1,*) omega,(-1.0D+00/PI)*aimag(0.25*(gt(1,1)+gt(2,2)+imag*gt(1,2)-imag*gt(2,1)))
+		!write(1,*) omega,(-1.0D+00/PI)*(eta*PI)*aimag(gt(2,2))
 
 		omega = omega + step
 	enddo	
