@@ -18,9 +18,9 @@ program green
 
 	! Definição das variáveis
 	real*16,parameter :: mu = 0
-	real*16, parameter :: eta = 10.0D-3
+	real*16, parameter :: eta = 10.0D-5
 	real*16, parameter :: t = 0.5
-	real*16, parameter :: delta = 0
+	real*16, parameter :: delta = t/2
 	real*16, parameter :: min = -2.0D+00
 	real*16, parameter :: max = 2.0D+00
 	real*16, parameter :: PI = 3.141592D+00
@@ -30,9 +30,9 @@ program green
 	complex*16,dimension(2,2) :: ID, V, W, WT, g, gtl,gtr,gnn, gb, inv
 	complex*16,dimension(2) :: work
 	
-	integer,parameter :: N = 1000 ! Number of sites
-	integer,parameter :: B = 500 ! Bulk site
-	integer,parameter :: qtd = 10000 ! Discretization
+	integer,parameter :: N = 30000 ! Number of sites
+	integer,parameter :: B = 15000 ! Bulk site
+	integer,parameter :: qtd = 1000 ! Discretization
 	integer,dimension(2) :: ipiv
 	integer :: i,j,info
 
