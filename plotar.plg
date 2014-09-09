@@ -1,0 +1,2 @@
+plot 'dados' with lines
+pause -1
