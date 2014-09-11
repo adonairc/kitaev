@@ -1,38 +1,30 @@
-subroutine print_matrix(M)
-	! Print 2x2 matrices
-	complex*16,dimension(2,2),intent(in) :: M
-	integer :: i,j
-	write(*,*)
-	do, i=1,2
-		!write(*,'(50g15.10)') ('(',real(M(i,j)),',',aimag(M(i,j)),')',j=1,2)
-		write(*,*) ('(',real(M(i,j)),',',aimag(M(i,j)),')',j=1,2)
-	enddo
-
-end subroutine print_matrix
-
 program green
 	implicit none
 
 	external ZGETRF
-    external ZGETRI
+        external ZGETRI
 
-	! Definição das variáveis
+	! Variables definitions
+	real*16, parameter :: t = 1.0
+	real*16, parameter :: gammal = 0.004*t
+	real*16, parameter :: t0 = 0
+	real*16,parameter :: mu0 = 5*gammal !mu0 = -edot
 	real*16,parameter :: mu = 0
+	real*16, parameter :: delta = 0.2*t
+	
 	real*16, parameter :: eta = 10.0D-5
-	real*16, parameter :: t = 0.5
-	real*16, parameter :: delta = t/2
-	real*16, parameter :: min = -2.0D+00
-	real*16, parameter :: max = 2.0D+00
+	real*16, parameter :: min = -20*gammal
+	real*16, parameter :: max = 20*gammal
 	real*16, parameter :: PI = 3.141592D+00
 	real*16 :: omega,step
 
 	complex*16 :: imag
-	complex*16,dimension(2,2) :: ID, V, W, WT, g, gtl,gtr,gnn, gb, inv
+	complex*16,dimension(2,2) :: ID, V, W, V0, W0, W0T, WT, g, gd, gtr, gtl, gdd, gnn, gb, inv
 	complex*16,dimension(2) :: work
 	
-	integer,parameter :: N = 30000 ! Number of sites
-	integer,parameter :: B = 15000 ! Bulk site
-	integer,parameter :: qtd = 1000 ! Discretization
+	integer,parameter :: N = 30000 !Number of sites
+	integer,parameter :: B = 2 ! Bulk site
+	integer,parameter :: qtd = 2000 ! Discretization points
 	integer,dimension(2) :: ipiv
 	integer :: i,j,info
 
@@ -50,11 +42,23 @@ program green
 
 	WT = transpose(conjg(W))
 
+	W0(1,1) = (0,0)
+	W0(1,2) = cmplx(0.0,0.5*t0)
+	W0(2,1) = cmplx(0.0,-0.5*t0)
+	W0(2,2) = (0,0)
+
+	W0T = transpose(conjg(W0))
+
 	V(1,1) = (0,0)
-	V(1,2) = cmplx(0.0,mu)
-	V(2,1) = cmplx(0.0,-mu)
+	V(1,2) = cmplx(0.0,0.5*mu)
+	V(2,1) = cmplx(0.0,-0.5*mu)
 	V(2,2) = (0,0)
 	
+	V0(1,1) = (0,0)
+	V0(1,2) = cmplx(0.0,0.5*mu0)
+	V0(2,1) = cmplx(0.0,-0.5*mu0)
+	V0(2,2) = (0,0)
+
 	step = (max-min)/qtd
 
 	open(unit=1,file="dados")
@@ -67,6 +71,11 @@ program green
 		g(2,1) = (0,0)
 		g(2,2) = 2.0/cmplx(omega,eta)
 		
+		gd(1,1) = 2.0/cmplx(omega,eta+gammal)
+		gd(1,2) = (0,0)
+		gd(2,1) = (0,0)
+		gd(2,2) = 2.0/cmplx(omega,eta+gammal)
+
 		inv = ID-matmul(g,V)
 
 		call ZGETRF(2,2,inv,2,ipiv,info)
@@ -80,31 +89,13 @@ program green
 		end if
 			
 		gb = matmul(inv,g)
-		gtl = gb
 		gtr = gb
+		gtl = gb
 
-		! Left branch
-		do j=1,B-1
-			inv = ID-matmul(matmul(gb,W),matmul(gtl,WT))
-
-			call ZGETRF(2,2,inv,2,ipiv,info)
-			if(info .ne. 0) then
-				write(*,*)"failed",info
-			end if
-
-			call ZGETRI(2,inv,2,ipiv,work,2,info)
-			if(info .ne. 0) then
-				write(*,*)"failed",info
-			end if
-
-			gtl = matmul(inv,gb)
-		enddo
 
 		! Right branch
-		do j=1,(N-B)+1
+		do j=1,(N-B)
 			inv = ID-matmul(matmul(gb,WT),matmul(gtr,W))
-			
-			!call print_matrix(inv)
 
 			call ZGETRF(2,2,inv,2,ipiv,info)
 			if(info .ne. 0) then
@@ -119,7 +110,54 @@ program green
 			gtr = matmul(inv,gb)
 		enddo
 
-		! Combination
+		! Green's function of the dot
+		inv = ID-matmul(gd,V0)
+		call ZGETRF(2,2,inv,2,ipiv,info)
+		if(info .ne. 0) then
+			write(*,*)"failed",info
+		end if
+
+		call ZGETRI(2,inv,2,ipiv,work,2,info)
+		if(info .ne. 0) then
+			write(*,*)"failed",info
+		end if
+		
+		gdd = matmul(inv,gd)
+
+
+		! Combination with first site
+		inv = ID-matmul(matmul(gdd,W0),matmul(gtl,W0T))
+
+		call ZGETRF(2,2,inv,2,ipiv,info)
+		if(info .ne. 0) then
+			write(*,*)"failed",info
+		end if
+
+		call ZGETRI(2,inv,2,ipiv,work,2,info)
+		if(info .ne. 0) then
+			write(*,*)"failed",info
+		end if
+
+		gtl = matmul(inv,gtl)
+
+		! Left branch
+		do j=2,B
+			inv = ID-matmul(matmul(gdd,W),matmul(gtl,WT))
+
+			call ZGETRF(2,2,inv,2,ipiv,info)
+			if(info .ne. 0) then
+				write(*,*)"failed",info
+			end if
+
+			call ZGETRI(2,inv,2,ipiv,work,2,info)
+			if(info .ne. 0) then
+				write(*,*)"failed",info
+			end if
+
+			gtl = matmul(inv,gb)
+		enddo
+
+		! Combination at bulk
 		inv = ID-matmul(matmul(gtr,W),matmul(gtl,WT))
 		call ZGETRF(2,2,inv,2,ipiv,info)
 		if(info .ne. 0) then
@@ -131,9 +169,9 @@ program green
 			write(*,*)"failed",info
 		end if
 
-		gnn = matmul(inv,gtr)
+		gnn = matmul(inv,gtl)
 
-		write(1,*) omega,(-1.0D+00/PI)*aimag(0.25*(gnn(1,1)+gnn(2,2)+imag*gnn(1,2)-imag*gnn(2,1)))
+		write(1,*) omega,PI*gammal*(-1.0D+00/PI)*aimag(0.25*(gnn(1,1)+gnn(2,2)+imag*gnn(1,2)-imag*gnn(2,1)))
 		!write(1,*) omega,(-1.0D+00/PI)*(eta*PI)*aimag(gt(2,2))
 
 		omega = omega + step
