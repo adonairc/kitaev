@@ -7,12 +7,12 @@ program green
 	! Variables definitions
 	real*16, parameter :: t = 1.0
 	real*16, parameter :: gammal = 0.004*t
-	real*16, parameter :: t0 = 0
+	real*16, parameter :: t0 = 20*gammal
 	real*16,parameter :: mu0 = 5*gammal !mu0 = -edot
 	real*16,parameter :: mu = 0
 	real*16, parameter :: delta = 0.2*t
 	
-	real*16, parameter :: eta = 10.0D-5
+	real*16, parameter :: eta = 10.0D-6
 	real*16, parameter :: min = -20*gammal
 	real*16, parameter :: max = 20*gammal
 	real*16, parameter :: PI = 3.141592D+00
@@ -23,7 +23,7 @@ program green
 	complex*16,dimension(2) :: work
 	
 	integer,parameter :: N = 30000 !Number of sites
-	integer,parameter :: B = 2 ! Bulk site
+	!integer,parameter :: B = 2 ! Bulk site
 	integer,parameter :: qtd = 2000 ! Discretization points
 	integer,dimension(2) :: ipiv
 	integer :: i,j,info
@@ -94,7 +94,7 @@ program green
 
 
 		! Right branch
-		do j=1,(N-B)
+		do j=1,N
 			inv = ID-matmul(matmul(gb,WT),matmul(gtr,W))
 
 			call ZGETRF(2,2,inv,2,ipiv,info)
@@ -123,42 +123,42 @@ program green
 		end if
 		
 		gdd = matmul(inv,gd)
-
+		
 
 		! Combination with first site
-		inv = ID-matmul(matmul(gdd,W0),matmul(gtl,W0T))
+! 		inv = ID-matmul(matmul(gb,W0),matmul(gtl,W0T))
 
-		call ZGETRF(2,2,inv,2,ipiv,info)
-		if(info .ne. 0) then
-			write(*,*)"failed",info
-		end if
+! 		call ZGETRF(2,2,inv,2,ipiv,info)
+! 		if(info .ne. 0) then
+! 			write(*,*)"failed",info
+! 		end if
 
-		call ZGETRI(2,inv,2,ipiv,work,2,info)
-		if(info .ne. 0) then
-			write(*,*)"failed",info
-		end if
+! 		call ZGETRI(2,inv,2,ipiv,work,2,info)
+! 		if(info .ne. 0) then
+! 			write(*,*)"failed",info
+! 		end if
 
-		gtl = matmul(inv,gtl)
+! 		gtl = matmul(inv,gb)
 
-		! Left branch
-		do j=2,B
-			inv = ID-matmul(matmul(gdd,W),matmul(gtl,WT))
+! 		! Left branch
+! 		do j=2,B
+! 			inv = ID-matmul(matmul(gb,W),matmul(gtl,WT))
 
-			call ZGETRF(2,2,inv,2,ipiv,info)
-			if(info .ne. 0) then
-				write(*,*)"failed",info
-			end if
+! 			call ZGETRF(2,2,inv,2,ipiv,info)
+! 			if(info .ne. 0) then
+! 				write(*,*)"failed",info
+! 			end if
 
-			call ZGETRI(2,inv,2,ipiv,work,2,info)
-			if(info .ne. 0) then
-				write(*,*)"failed",info
-			end if
+! 			call ZGETRI(2,inv,2,ipiv,work,2,info)
+! 			if(info .ne. 0) then
+! 				write(*,*)"failed",info
+! 			end if
 
-			gtl = matmul(inv,gb)
-		enddo
+! 			gtl = matmul(inv,gb)
+! 		enddo
 
 		! Combination at bulk
-		inv = ID-matmul(matmul(gtr,W),matmul(gtl,WT))
+		inv = ID-matmul(matmul(gtr,W0),matmul(gdd,W0T))
 		call ZGETRF(2,2,inv,2,ipiv,info)
 		if(info .ne. 0) then
 			write(*,*)"failed",info
@@ -169,9 +169,9 @@ program green
 			write(*,*)"failed",info
 		end if
 
-		gnn = matmul(inv,gtl)
+		gnn = matmul(inv,gtr)
 
-		write(1,*) omega,PI*gammal*(-1.0D+00/PI)*aimag(0.25*(gnn(1,1)+gnn(2,2)+imag*gnn(1,2)-imag*gnn(2,1)))
+		write(1,*) gammal*omega,PI*gammal*(-1.0D+00/PI)*aimag(0.25*(gnn(1,1)+gnn(2,2)+imag*gnn(1,2)-imag*gnn(2,1)))
 		!write(1,*) omega,(-1.0D+00/PI)*(eta*PI)*aimag(gt(2,2))
 
 		omega = omega + step
