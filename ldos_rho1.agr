@@ -84,7 +84,7 @@
 @timestamp rot 0
 @timestamp font 0
 @timestamp char size 1.000000
-@timestamp def "Fri Sep 12 11:23:20 2014"
+@timestamp def "Fri Sep 12 11:34:27 2014"
 @r0 off
 @link r0 to g0
 @r0 type above
@@ -322,7 +322,7 @@
 @    s0 errorbar riser clip off
 @    s0 errorbar riser clip length 0.100000
 @    s0 comment "/home/arc/Dropbox/mestrado/numerico/kitaev/rho1_t0_0.dados"
-@    s0 legend  ""
+@    s0 legend  "t0 = 0"
 @    s1 hidden false
 @    s1 type xy
 @    s1 symbol 0
@@ -371,7 +371,7 @@
 @    s1 errorbar riser clip off
 @    s1 errorbar riser clip length 0.100000
 @    s1 comment "/home/arc/Dropbox/mestrado/numerico/kitaev/rho1_t0_2g.dados"
-@    s1 legend  ""
+@    s1 legend  "t0 = 2*g"
 @    s2 hidden false
 @    s2 type xy
 @    s2 symbol 0
@@ -420,7 +420,7 @@
 @    s2 errorbar riser clip off
 @    s2 errorbar riser clip length 0.100000
 @    s2 comment "/home/arc/Dropbox/mestrado/numerico/kitaev/rho1_t0_10g.dados"
-@    s2 legend  ""
+@    s2 legend  "t0 = 10*g"
 @    s3 hidden false
 @    s3 type xy
 @    s3 symbol 0
@@ -469,7 +469,7 @@
 @    s3 errorbar riser clip off
 @    s3 errorbar riser clip length 0.100000
 @    s3 comment "/home/arc/Dropbox/mestrado/numerico/kitaev/rho1_t0_20g.dados"
-@    s3 legend  ""
+@    s3 legend  "t0 = 20*g"
 @target G0.S0
 @type xy
 -0.080000004 1.7738382e-06

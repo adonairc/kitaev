@@ -171,7 +171,7 @@ program green
 
 		gnn = matmul(inv,gtr)
 
-		write(1,*) gammal*omega,PI*gammal*(-1.0D+00/PI)*aimag(0.25*(gnn(1,1)+gnn(2,2)+imag*gnn(1,2)-imag*gnn(2,1)))
+		write(1,*) omega/gammal,PI*gammal*(-1.0D+00/PI)*aimag(0.25*(gnn(1,1)+gnn(2,2)+imag*gnn(1,2)-imag*gnn(2,1)))
 		!write(1,*) omega,(-1.0D+00/PI)*(eta*PI)*aimag(gt(2,2))
 
 		omega = omega + step
